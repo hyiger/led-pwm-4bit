@@ -1,0 +1,16 @@
+# KiCad local state, local history and backups
+.history/
+*.kicad_prl
+*-backups/
+fp-info-cache
+*.lck
+_autosave-*
+\#auto_saved_files\#
+~*.kicad_sch
+~*.kicad_pcb
+
+# Python
+__pycache__/
+
+# macOS
+.DS_Store

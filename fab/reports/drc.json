@@ -1,0 +1,108 @@
+{
+    "$schema": "https://schemas.kicad.org/drc.v1.json",
+    "coordinate_units": "mm",
+    "date": "2026-10-07T16:26:37",
+    "ignored_checks": [
+        {
+            "description": "Footprint has no courtyard defined",
+            "key": "missing_courtyard"
+        },
+        {
+            "description": "Track endpoint not centered on via",
+            "key": "track_not_centered_on_via"
+        },
+        {
+            "description": "Tuning profile track geometries",
+            "key": "tuning_profile_track_geometries"
+        },
+        {
+            "description": "Footprint doesn't match symbol's footprint filters",
+            "key": "footprint_filters_mismatch"
+        },
+        {
+            "description": "Footprint component type doesn't match footprint pads",
+            "key": "footprint_type_mismatch"
+        }
+    ],
+    "included_severities": [
+        "error",
+        "warning",
+        "exclusion"
+    ],
+    "kicad_version": "10.0.7",
+    "schematic_parity": [],
+    "source": "led-pwm-4bit.kicad_pcb",
+    "unconnected_items": [
+        {
+            "description": "Missing connection between items",
+            "items": [
+                {
+                    "description": "Pad 1 [/UPDI_BUS] of R11 on F.Cu",
+                    "pos": {
+                        "x": 112.775,
+                        "y": 109.0
+                    },
+                    "uuid": "261eb13f-f217-4b37-b706-c924266b7e9d"
+                },
+                {
+                    "description": "Pad 2 [/UPDI_BUS] of D3 on F.Cu",
+                    "pos": {
+                        "x": 112.26,
+                        "y": 105.9
+                    },
+                    "uuid": "c7977ebf-0f44-40db-9183-22c2b622f97b"
+                }
+            ],
+            "severity": "error",
+            "type": "unconnected_items"
+        },
+        {
+            "description": "Missing connection between items",
+            "items": [
+                {
+                    "description": "Track [/SEL3] on F.Cu, length 0.7250 mm",
+                    "pos": {
+                        "x": 124.65,
+                        "y": 111.835001
+                    },
+                    "uuid": "b928cc2c-33ec-43da-8198-aebf7239e4fe"
+                },
+                {
+                    "description": "Pad 2 [/SEL3] of R10 on F.Cu",
+                    "pos": {
+                        "x": 128.775,
+                        "y": 112.56
+                    },
+                    "uuid": "f7feaca7-c619-49fa-a341-e1b6d5f223d8"
+                }
+            ],
+            "severity": "error",
+            "type": "unconnected_items"
+        }
+    ],
+    "violations": [
+        {
+            "description": "Thermal relief connection to zone incomplete (layer F.Cu; zone min spoke count 2; actual 1)",
+            "items": [
+                {
+                    "description": "Zone 'GND top' [GND] on F.Cu, priority 0",
+                    "pos": {
+                        "x": 100.0,
+                        "y": 100.0
+                    },
+                    "uuid": "79f34e01-dd17-4173-b019-44c0cf9dfeef"
+                },
+                {
+                    "description": "Pad 2 [GND] of C6 on F.Cu",
+                    "pos": {
+                        "x": 124.65,
+                        "y": 109.03
+                    },
+                    "uuid": "b6cc2898-db40-4259-bba0-8e6672204db0"
+                }
+            ],
+            "severity": "error",
+            "type": "starved_thermal"
+        }
+    ]
+}

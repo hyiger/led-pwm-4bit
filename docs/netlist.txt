@@ -1,0 +1,34 @@
+# Reference netlist for led-pwm-4bit. check_netlist.py compares the
+# schematic's exported netlist against this file.
+#
+# Format: NET: REF.PIN ...   Every pin of every part except H1 and H2
+# appears exactly once. "NC:" lists pins that must stay unconnected.
+#
+# Differs from spec Rev 0.1 section 6 in three places:
+# - The 47 uF electrolytic C2 is replaced by two 1206 MLCCs, C2 and C9.
+# - J4 is a 6-pin FTDI-style header with an on-board SerialUPDI network
+#   (D3, R11) instead of a 3-pin UPDI header.
+# - SEL0..SEL3 use the permutation section 6 allows, so the four input
+#   rows from J3 reach U2 without crossing: SEL0 = PA2, SEL1 = PA1,
+#   SEL2 = PA7, SEL3 = PA6.
+
++24V_IN: J1.1 F1.1
+VIN_F:   F1.2 D1.2
++24V:    D1.1 C1.1 C2.1 C9.1 U1.3 D2.1 J2.1 TP1.1
+GND:     J1.2 C1.2 C2.2 C9.2 U1.1 C3.2 C4.2 U2.8 R2.2 Q1.2 J3.1 J4.1 J4.2 C5.2 C6.2 C7.2 C8.2 TP3.1
++3V3:    U1.2 C3.1 C4.1 U2.1 R3.1 R4.1 R5.1 R6.1 TP2.1
+UPDI:     U2.6 R11.2
+UPDI_BUS: J4.5 R11.1 D3.2
+UPDI_TX:  J4.4 D3.1
+PWM:     U2.7 R1.1 TP4.1
+GATE:    R1.2 R2.1 Q1.1
+LED_NEG: Q1.3 D2.2 J2.2 TP5.1
+IN0:     J3.2 R3.2 R7.1
+IN1:     J3.3 R4.2 R8.1
+IN2:     J3.4 R5.2 R9.1
+IN3:     J3.5 R6.2 R10.1
+SEL0:    R7.2 C5.1 U2.5
+SEL1:    R8.2 C6.1 U2.4
+SEL2:    R9.2 C7.1 U2.3
+SEL3:    R10.2 C8.1 U2.2
+NC:      J4.3 J4.6
