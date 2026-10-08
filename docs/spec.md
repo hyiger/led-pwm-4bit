@@ -1,6 +1,6 @@
 # 4-Bit LED PWM Controller: KiCad Handoff Spec
 
-Author: hyiger · Rev 0.3 · 2026-10-07
+Author: hyiger · Rev 0.4 · 2026-10-07
 
 This is the complete brief for the KiCad project. The netlist in [`netlist.txt`](netlist.txt) is the source of truth; section 6 summarises it. Where this document and a datasheet disagree on a pin number, the datasheet wins: stop and report the conflict.
 
@@ -13,6 +13,7 @@ A small 2-layer board that dims a 24 V constant-voltage LED strip (about 120 mA)
                    ├─ C1, C2, C9                J2.2  strip − ─┐
                    └─ U1 (LDO) ─ +3V3 ─ U2 (ATtiny412)         │
 Hackerboard pins 0–3 ─ J3 ─ pull-up + RC ─ U2 inputs           │
+Hackerboard GND ─ J3.1 ─ F2 (PPTC) ─ board GND                  │
                                   U2 PA3 ─ R1 ─ gate Q1 ─ drain┘
 USB-serial adapter ─ J4 ─ D3 + R11 (SerialUPDI) ─ U2 PA0/UPDI
 ```
@@ -38,29 +39,29 @@ Consequence for this board: each input needs a pull-up to 3.3 V, and the firmwar
 
 | Item | Requirement |
 |---|---|
-| Supply | 24 V DC nominal, 20–28 V operating |
+| Supply | 24 V DC nominal, 20–28 V operating, fused or current-limited at the source (2–3 A fast fuse rated ≥ 32 V DC, or a 1–2 A supply) |
 | Load | Constant-voltage LED strip, 120 mA nominal; copper sized for 1 A |
 | Switching | Low-side N-MOSFET, strip + tied to the protected 24 V rail |
 | Levels | 16, gamma-corrected, level 0 fully off, level 15 fully on (100% duty) |
 | PWM | 10-bit, about 2.44 kHz |
 | Logic rail | 3.3 V from an on-board LDO, under 5 mA load |
 | Default state | Strip off during reset, programming, and with inputs disconnected |
-| Protection | Input fuse, reverse-polarity diode, clamp diode across the strip |
+| Protection | Input fuse, reverse-polarity diode, clamp diode across the strip, PPTC in the Hackerboard/programmer ground return |
 | Programming | SerialUPDI with any 3.3 V USB-serial adapter on J4, board powered from 24 V |
 
 ## 4. Circuit blocks
 
-**Input and protection.** J1 → F1 (resettable fuse) → D1 (series Schottky, reverse-polarity protection) → `+24V`. F1 trips at 1 A, which also keeps D1 (a 1 A part) within rating. D1 protects only the board's own rail: with J3 connected to the printer, swapped J1 wires put supply + on board GND, which J3 pin 1 ties to printer ground (see section 12). C2 and C9 (4.7 µF 50 V X7R 1206 MLCCs, about 2.7 µF each at 24 V) are the bulk capacitance. C2 sits in the PWM loop beside Q1 and J2; C9 sits at U1's input. With no electrolytic, F1's resistance is the only damping of hot-plug ringing on the input; the estimated peak is 30–40 V.
+**Input and protection.** J1 → F1 (resettable fuse) → D1 (series Schottky, reverse-polarity protection) → `+24V`. F1 handles slow overloads: it holds 0.5 A, trips at 1 A, and needs up to 0.15 s at 8 A. It is rated to interrupt only 10 A, so the feed must be fused at the source (section 3); with that, D1 stays within its surge rating. F1 does not protect Q1: a short across J2 while the strip is lit can destroy Q1 before F1 trips. D1 protects only the board's own rail. When the supply shares ground with the printer, swapped J1 wires put supply + on board GND. The Hackerboard ground (J3 pin 1) and the programming adapter's ground (J4 pins 1 and 2) therefore reach board GND only through F2 (net `HB_GND`). F2 is a 0.1 A / 60 V PPTC rated to interrupt 100 A; its 1.6 Ω minimum resistance limits a 28 V short to 17.5 A until it trips. In normal use it carries only a few mA of signal return. Tripped, it still passes about 30 mA and leaves board GND up to 28 V above the printer's ground. C2 and C9 (4.7 µF 50 V X7R 1206 MLCCs, about 2.7 µF each at 24 V) are the bulk capacitance. C2 sits in the PWM loop beside Q1 and J2; C9 sits at U1's input. With no electrolytic, F1's resistance is the only damping of hot-plug ringing on the input, and D1 holds the peak on `+24V`. At 24 V with leads of 2 m or less the first peak is about 30–36 V. At 28 V with heavy leads and F1 near its 0.15 Ω minimum it can reach 45–50 V, above Q1's 45 V and the MLCCs' 50 V rating. A 47 µF 50 V electrolytic with 0.3–1 Ω ESR on `+24V` would hold it near 28 V.
 
 **3.3 V rail.** U1 is an MCP1792-3302 (55 V input, 70 V transient, 100 mA) in SOT-23A. C1 is its input capacitor and C3 its output capacitor. All passives except C2 and C9 (1206) are 0603. The datasheet requires at least 2.2 µF of ceramic on the output and recommends 3.3 µF: C3 (10 µF 10 V X5R) keeps about 5.9 µF at 3.3 V. It recommends 2.2–10 µF on the input. No 0603 part rated 50 V holds much at 24 V: C1 (2.2 µF 50 V X5R) keeps about 0.4 µF, and C9 beside it adds about 2.7 µF. Dissipation is about (28 − 3.3) V × 5 mA ≈ 124 mW at the 28 V maximum, or 104 mW at 24 V nominal.
 
 **MCU.** U2 is an ATtiny412 in SOIC-8, running at 10 MHz from its internal oscillator. C4 decouples it.
 
-**Inputs.** Each of the four lines has a 10 kΩ pull-up to `+3V3` on the connector side, then 1 kΩ in series, then 10 nF to ground at the MCU pin. With all four lines low the pull-ups draw 1.3 mA.
+**Inputs.** Each of the four lines has a 10 kΩ pull-up to `+3V3` on the connector side, then 10 kΩ in series, then 10 nF to ground at the MCU pin (100 µs). With all four lines low the pull-ups draw 1.3 mA. The 10 kΩ series resistors also limit the current into the MCU pins to about 2.4 mA each if F2 trips and the board ground is lifted 24 V above the Hackerboard's. In that fault the pull-ups also draw up to about 11 mA out of `+3V3`, pulling it about 0.6 V below GND, past the U1 (−0.3 V) and U2 (−0.5 V) supply-pin limits (section 12).
 
 **Output stage.** U2 PA3 → R1 (100 Ω) → gate of Q1. R2 (100 kΩ) holds the gate low while PA3 is high-impedance. Q1 is a ROHM RTR030N05HZGTL (45 V, RDS(on) ≤ 95 mΩ at VGS = 2.5 V, 3 A, TSMT3 on the SOT-23 land): about 11 mV drop and 1.4 mW at 120 mA. Its 45 V rating is the lowest on the 24 V side; the AO3422 (55 V) is not sold by Mouser, and no 55–60 V SOT-23 part in stock there has RDS(on) specified at 3.3 V or below. D2 clamps the drain to `+24V` to absorb wiring inductance.
 
-**Programming.** J4 is a 6-pin FTDI-style header, numbered from the adapter's side. The adapter's TXD (pin 4) reaches the UPDI line through D3, a Schottky with its cathode toward TXD. The adapter's RXD (pin 5) connects to the UPDI line directly. R11 (470 Ω) sits between that line and PA0/UPDI. CTS (pin 2) is tied to GND, so CTS is asserted on adapters that enable handshaking by default. VCC (pin 3) is not connected, because some 3.3 V-logic adapters put 5 V there. DTR (pin 6) is not connected. A dedicated UPDI programmer uses pin 5 (UPDI) and pin 1 (GND). Microchip tools (Atmel-ICE, MPLAB SNAP, PICkit) also need their target-voltage sense lead on +3V3 (TP2), with the board powered from 24 V and "power target from tool" off.
+**Programming.** J4 is a 6-pin FTDI-style header, numbered from the adapter's side. The adapter's TXD (pin 4) reaches the UPDI line through D3, a Schottky with its cathode toward TXD. The adapter's RXD (pin 5) connects to the UPDI line directly. R11 (470 Ω) sits between that line and PA0/UPDI. GND (pin 1) and CTS (pin 2) go to `HB_GND`, the ground behind F2, so CTS is asserted on adapters that enable handshaking by default. VCC (pin 3) is not connected, because some 3.3 V-logic adapters put 5 V there. DTR (pin 6) is not connected. A dedicated UPDI programmer uses pin 5 (UPDI) and pin 1 (GND). Microchip tools (Atmel-ICE, MPLAB SNAP, PICkit) also need their target-voltage sense lead on +3V3 (TP2), with the board powered from 24 V and "power target from tool" off.
 
 ## 5. BOM
 
@@ -74,6 +75,7 @@ All parts come from manufacturers Mouser stocks. Each was checked against its ma
 | D1, D2 | Diodes Inc B160-13-F | SMA | 60 V 1 A Schottky |
 | D3 | onsemi BAT54HT1G | SOD-323 | Pin 1 K, 2 A. 30 V |
 | F1 | Littelfuse 1812L050/60MR | 1812 | 0.5 A hold, 1 A trip, 60 V, Imax 10 A |
+| F2 | Bel Fuse 0ZCG0010FF2C | 1812 | 0.1 A hold, 0.3 A trip, 60 V, Imax 100 A, Rmin 1.6 Ω. Fallback Bourns MF-MSMF010/60X-2 (40 A) |
 | C1 | Murata GRM188R61H225KE11D, 2.2 µF 50 V X5R | 0603 | U1 input, about 0.4 µF at 24 V |
 | C2, C9 | Murata GRM31CR71H475MA12L, 4.7 µF 50 V X7R | 1206 | Bulk, about 2.7 µF each at 24 V |
 | C3 | Samsung CL10A106MP8NQWC, 10 µF 10 V X5R | 0603 | U1 output, about 5.9 µF at 3.3 V |
@@ -82,7 +84,7 @@ All parts come from manufacturers Mouser stocks. Each was checked against its ma
 | R1 | YAGEO RC0603FR-07100RL, 100 Ω 1% | 0603 | Gate series |
 | R2 | YAGEO RC0603FR-07100KL, 100 kΩ 1% | 0603 | Gate pull-down |
 | R3–R6 | YAGEO RC0603FR-0710KL, 10 kΩ 1% | 0603 | Input pull-ups |
-| R7–R10 | YAGEO RC0603FR-071KL, 1 kΩ 1% | 0603 | Input series |
+| R7–R10 | YAGEO RC0603FR-0710KL, 10 kΩ 1% | 0603 | Input series |
 | R11 | YAGEO RC0603FR-07470RL, 470 Ω 1% | 0603 | UPDI series |
 | J1, J2 | Phoenix Contact 1984617 (PT 1,5/2-3,5-H) | THT | 24 V in, strip out |
 | J3 | Würth 61300511121, 1×5 2.54 mm | THT | Hackerboard |
@@ -101,7 +103,8 @@ Diode pin numbers follow the KiCad convention: pin 1 cathode, pin 2 anode.
 UPDI:     U2.6 R11.2
 UPDI_BUS: J4.5 R11.1 D3.2
 UPDI_TX:  J4.4 D3.1
-GND:      ... C2.2 C9.2 ... J4.1 J4.2 ...  (J4.2 = CTS)
+GND:      ... C2.2 C9.2 ... F2.2 ...  (J3.1, J4.1, J4.2 moved to HB_GND)
+HB_GND:   J3.1 J4.1 J4.2 F2.1      (J4.2 = CTS)
 +3V3:     ... (J4 no longer on +3V3)
 NC:       J4.3 J4.6
 SEL0:     R7.2 C5.1 U2.5         (PA2)
@@ -118,14 +121,14 @@ U2 pin map (ATtiny412 SOIC-8): 1 VDD, 2 PA6, 3 PA7, 4 PA1, 5 PA2, 6 PA0/UPDI, 7 
 |---|---|---|---|---|---|---|
 | J1, 24 V in | +24 V | GND | | | | |
 | J2, strip | Strip + | Strip − | | | | |
-| J3, Hackerboard J6 pins 1–5 | GND | Pin 0 (bit 0) | Pin 1 (bit 1) | Pin 2 (bit 2) | Pin 3 (bit 3) | |
-| J4, FTDI adapter | GND | CTS (to GND) | VCC (n.c.) | TXD (adapter out) | RXD (adapter in) = UPDI | DTR (n.c.) |
+| J3, Hackerboard J6 pins 1–5 | GND (through F2) | Pin 0 (bit 0) | Pin 1 (bit 1) | Pin 2 (bit 2) | Pin 3 (bit 3) | |
+| J4, FTDI adapter | GND (through F2) | CTS (to GND through F2) | VCC (n.c.) | TXD (adapter out) | RXD (adapter in) = UPDI | DTR (n.c.) |
 
 Program with the board powered from 24 V. Never connect the board's 3.3 V to the adapter's VCC.
 
 ## 8. PCB constraints
 
-- 2 layers, 1.6 mm FR4, 1 oz copper, outline 40 × 30 mm, two M3 holes. JLCPCB adds a small-board fee when a side is 30 mm or less; 40 × 31 mm avoids it.
+- 2 layers, 1.6 mm FR4, 1 oz copper, outline 40 × 30 mm, two M3 holes with no copper within 3.75 mm of their centres, so metal mounting hardware cannot reach board GND. JLCPCB adds a small-board fee when a side is 30 mm or less; 40 × 31 mm avoids it.
 - Board Setup > Constraints holds JLCPCB's 2-layer 1 oz absolute minimums: 0.10 mm clearance, track and connection width, 0.05 mm via annular ring, 0.25 mm via diameter, 0.15 mm drill, 0.2 mm hole-to-hole, 0.2 mm copper-to-hole, 0.2 mm copper-to-edge, silk text 1.0 mm high with 0.15 mm stroke. Solder mask: 0 expansion, 0.1 mm minimum web, 0.09 mm mask to copper.
 - `led-pwm-4bit.kicad_dru` adds the JLCPCB limits those fields cannot express: PTH ring ≥ 0.18 mm, PTH hole to copper ≥ 0.28 mm, pad hole to hole ≥ 0.45 mm, NPTH ≥ 0.5 mm, pad to silkscreen ≥ 0.15 mm.
 - Net classes carry the design values. Default: 0.2 mm clearance, 0.25 mm track, 0.6/0.3 mm via. Power (`+24V_IN`, `VIN_F`, `+24V`, `LED_NEG`, `GND`): 0.5 mm track, enforced as a DRC minimum.
@@ -185,6 +188,7 @@ Keep the default 115200 baud at 3.3 V. In the Arduino IDE with megaTinyCore, use
 
 Resolved:
 
+- Reverse polarity through a shared ground: F2 in the J3/J4 ground return (section 4), with R7–R10 raised to 10 kΩ.
 - Hackerboard connector: J6, 1×10 2.54 mm. Pins 1–5 = GND, 0, 1, 2, 3, so J3 is a 1×5 2.54 mm header.
 - TCA0 WO0 defaults to PA3 (ATtiny212/412 datasheet DS40002287A, Table 5-2 and PORTMUX.CTRLC).
 - F1: Littelfuse 1812L050/60MR (60 V, 0.5 A hold).
@@ -193,12 +197,18 @@ Resolved:
 Still open:
 
 - Core One INDX compatibility of the Hackerboard (see section 2).
-- Reverse polarity through J3: if the 24 V comes from the printer's PSU and the J1 wires are swapped, supply + reaches board GND and shorts through J3 pin 1 into the Hackerboard and printer ground. A PPTC (≥ 30 V, 50–100 mA hold) in series with J3 pin 1 would stop it. Not yet decided.
 - Mouser part numbers: to be read off Mouser's live listings, or resolved by uploading the order CSV to Mouser's BOM tool.
+- With F2 tripped the board ground floats up to 28 V above the printer's. R7–R10 limit the input pins to about 2.4 mA each, but:
+  - the pull-ups R3–R6 pull `+3V3` about 0.6 V below GND at up to 11 mA. A low-VF Schottky from GND to `+3V3` (Microchip DS20006229 section 4.4) would clamp it;
+  - a programming adapter on J4 at the same time sees 41–57 mA through R11 and D3. That burns R11 (0.8–1.5 W) and drives U2's UPDI pin below GND. Check J1 polarity before plugging in an adapter.
+  A low-side reverse-polarity MOSFET in the J1 return would stop board GND rising at all and remove both cases.
+- A short across J2 while Q1 conducts can destroy Q1 before F1 trips; a failed Q1 usually shorts and leaves the strip on. Check the strip wiring before the first power-up and replace Q1 after any strip short.
+- Hot-plug overshoot at 28 V with heavy leads can exceed Q1's 45 V (section 4). Avoid hot-plugging J1 at 28 V, or add a damped electrolytic.
+- Bel's 100 A rating for F2 is unusually high for its size (Littelfuse's equivalent is rated 10 A at 60 V); Bel's datasheet, product page and the Fuzetec original all state 100 A. The Bourns fallback is rated 40 A.
 - Strip current: above 0.5 A, F1 and D1 have to change.
-- Where the 24 V comes from. If it is not the printer's own supply, the two grounds still have to be common through J3 pin 1. Route the strip return straight to the supply so only signal current flows through the Hackerboard ground.
+- Where the 24 V comes from. If it is not the printer's own supply, the two grounds still have to be common through J3 pin 1. Run the supply's − wire straight to J1 pin 2 and keep it separate from the Hackerboard cable's ground, so only signal current flows through the Hackerboard ground.
 
-Left out on purpose: a TVS on the 24 V input, a status LED (no spare MCU pin), and any isolation between the printer and the strip.
+Left out on purpose: a TVS on the 24 V input (an SMAJ28A-class part still lets 44–47 V through at 28 V, so it would not protect Q1), a status LED (no spare MCU pin), and any isolation between the printer and the strip.
 
 ## 13. Sources
 
@@ -213,6 +223,7 @@ Left out on purpose: a TVS on the 24 V input, a status LED (no spare MCU pin), a
 
 ## Revision history
 
+- 0.4 (2026-10-07): F2 (PPTC) in the Hackerboard and programmer ground return (net `HB_GND`); R7–R10 raised to 10 kΩ; copper keepout around the mounting holes; source fusing required; fault limits documented after an adversarial review.
 - 0.3 (2026-10-07): Parts sourced from Mouser (Q1 ROHM RTR030N05HZGTL, D3 BAT54HT1G on SOD-323, F1 Littelfuse, J1/J2 Phoenix 1984617, Würth headers, Yageo/KEMET/Murata/Samsung passives); the 47 µF electrolytic replaced by C2 and C9 (4.7 µF 50 V X7R 1206); JLCPCB assembly files dropped.
 - 0.2 (2026-10-07): 0603 passives throughout; J4 changed to an FTDI-style SerialUPDI header with D3 and R11; SEL pins permuted for routing; JLCPCB rules; parts selected with LCSC numbers; open items from 0.1 resolved.
 - 0.1 (2026-10-07): first handoff.

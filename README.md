@@ -15,7 +15,7 @@ reference netlist is [docs/netlist.txt](docs/netlist.txt).
 |---|---|
 | Schematic | Done. ERC: 0 violations. `check_netlist.py`: matches `docs/netlist.txt` |
 | Placement | Done. Schematic parity clean |
-| Routing | In progress. DRC after a pour refill: 2 unrouted connections (UPDI_BUS R11–D3, SEL3 R10) and one starved thermal on C6 pad 2 |
+| Routing | In progress. DRC after a pour refill: 5 unrouted connections (three `HB_GND` links to the new F2, UPDI_BUS R11–D3, SEL3 R10) and one starved thermal on C6 pad 2. No GND stitching vias yet (see [Routing notes](#routing-notes)) |
 | Parts | Every line has a manufacturer part carried by Mouser; see [Parts](#parts) |
 | Firmware | Not started (spec section 9) |
 
@@ -37,13 +37,15 @@ All parts are chosen from manufacturers Mouser stocks, and each was checked agai
 its manufacturer's datasheet for package, pinout and ratings. Capacitor values were
 also checked against DC-bias data.
 `fab/led-pwm-4bit-bom.csv` is the full BOM and `fab/led-pwm-4bit-mouser-order.csv`
-is in Mouser's BOM-tool format (`BOARDS=n scripts/export-fab.sh` scales it).
+is in Mouser's BOM-tool format (`BOARDS=n scripts/export-fab.sh` scales it). The
+order rounds the resistors, capacitors and D3 up to at least 10 with spares, which
+costs less than the exact count at Mouser's single-piece prices.
 
 The Mouser part-number column is left empty on purpose. Mouser blocks automated
 access, so no Mouser number could be read off its live listing, and a guessed
 number can import cleanly and still be the wrong part. Mouser's BOM tool matches
 each line on the manufacturer part number instead. Once a Mouser number is
-confirmed, put it in the symbol's `Mouser` field and the export carries it.
+confirmed, add a field named `Mouser` to that symbol and the export carries it.
 
 | Ref | Part | Notes |
 |---|---|---|
@@ -53,12 +55,13 @@ confirmed, put it in the symbol's `Mouser` field and the export carries it.
 | D1, D2 | Diodes Inc B160-13-F | 60 V 1 A Schottky, SMA |
 | D3 | onsemi BAT54HT1G | SOD-323, pin 1 cathode (BAT54J is out of stock at Mouser) |
 | F1 | Littelfuse 1812L050/60MR | 0.5 A hold, 60 V, Imax 10 A |
+| F2 | Bel Fuse 0ZCG0010FF2C | 0.1 A hold, 60 V, Imax 100 A; Hackerboard/programmer ground return |
 | C1 | Murata GRM188R61H225KE11D | 2.2 µF 50 V X5R 0603, about 0.4 µF at 24 V |
 | C2, C9 | Murata GRM31CR71H475MA12L | 4.7 µF 50 V X7R 1206, about 2.7 µF each at 24 V |
 | C3 | Samsung CL10A106MP8NQWC | 10 µF 10 V X5R 0603, about 5.9 µF at 3.3 V |
 | C4 | KEMET C0603C104K5RACTU | 100 nF 50 V X7R |
 | C5–C8 | KEMET C0603C103K5RACTU | 10 nF 50 V X7R |
-| R1–R11 | YAGEO RC0603FR-07…L | 1 % 0603 |
+| R1–R11 | YAGEO RC0603FR-07…L | 1 % 0603; R3–R10 are all 10 kΩ |
 | J1, J2 | Phoenix Contact 1984617 | PT 1,5/2-3,5-H, the part the footprint is drawn for |
 | J3 | Würth 61300511121 | 1×5 2.54 mm header |
 | J4 | Würth 61300611121 | 1×6 2.54 mm header |
@@ -72,9 +75,31 @@ capacitance at 24 V than any 10 µF 1206 part Mouser stocks.
   0.5 mm, and DRC rejects anything narrower. Signals default to 0.25 mm.
 - Rule areas keep tracks off B.Cu under Q1 and U2, so the bottom pour stays whole
   there (spec section 8). Ground vias are still allowed.
-- Return Q1's source (pin 2) straight to the GND pad of C2. Stitch both pours with
-  GND vias around Q1, C2, C9 and J2.
+- Return Q1's source (pin 2) straight to the GND pad of C2.
+- Stitch the pours with GND vias (0.6/0.3 mm). The +24V and +3V3 tracks split the
+  top pour, and the bottom pour currently touches GND only at J1.2. Positions checked
+  on a copy with no new DRC errors: (120.05, 118.5) at C9.2 and (128.6, 120.4) at
+  U1.1, which brings C9 back to U1's input; (117.6, 126.2) at Q1.2/C2.2;
+  (117.5, 112.5) at U2.8/C4.2; and optionally next to C5.2, C7.2 and C8.2.
+- C6 pad 2 gets only one thermal spoke because SEL1 and SEL2 crowd it. A 0.5 mm GND
+  track from the pad to a GND via at (125.75, 108.75) clears the DRC error.
+- `HB_GND` joins J3 pin 1, J4 pins 1–2 and F2 pad 1. A 0.25 mm track is enough,
+  and it survives the brief fault current before F2 trips. J3.1 to J4.1 runs easily
+  on B.Cu. Keep it out of the GND pour: F2 is the only connection between the two
+  grounds.
 - `scripts/export-fab.sh` refills the pours before its DRC, without saving the board.
+
+## Wiring and mounting
+
+- Fuse the 24 V feed at the source: a 2–3 A fast fuse (rated ≥ 32 V DC) in the +
+  lead at the PSU or tap point, or a separate 1–2 A supply. F1 is rated to interrupt
+  only 10 A and does not protect the J1 cable.
+- Run the supply's − wire straight to J1 pin 2. Don't share it with the Hackerboard
+  cable's ground, so only signal current flows through the Hackerboard ground.
+- Check the strip wiring for a short between + and − before the first power-up.
+- Mount the board on standoffs with nylon screws, or keep metal hardware away from any
+  grounded frame. The mounting holes have no copper around them.
+- Avoid hot-plugging J1 at 28 V with long leads (see Open items).
 
 ## Connectors
 
@@ -82,8 +107,8 @@ capacitance at 24 V than any 10 µF 1206 part Mouser stocks.
 |---|---|---|---|---|---|---|
 | J1 24 V in | +24 V | GND | | | | |
 | J2 LED strip | Strip + | Strip − | | | | |
-| J3 Hackerboard J6 pins 1–5 | GND | out0 | out1 | out2 | out3 | |
-| J4 FTDI adapter | GND | CTS (GND) | VCC (n.c.) | TXD | RXD / UPDI | DTR (n.c.) |
+| J3 Hackerboard J6 pins 1–5 | GND (via F2) | out0 | out1 | out2 | out3 | |
+| J4 FTDI adapter | GND (via F2) | CTS (GND via F2) | VCC (n.c.) | TXD | RXD / UPDI | DTR (n.c.) |
 
 Hackerboard J6 is a 1×10 2.54 mm footprint, usually bare holes. Its pin 1 is the
 square pad by the `GND` label at the `0` end. A straight 1×5 cable from J6 pins 1–5
@@ -152,18 +177,34 @@ no unrouted connections.
   SEL2 = PA7, SEL3 = PA6. Section 6 of the spec allows this.
 - Q1 is a ROHM RTR030N05HZGTL (45 V) instead of the AO3422 (55 V), which Mouser
   does not carry.
+- F2 puts the Hackerboard and programmer grounds (net `HB_GND`) behind a 0.1 A PPTC,
+  and R7–R10 are 10 kΩ instead of 1 kΩ.
 - Board constraints follow JLCPCB's 2-layer 1 oz capabilities. The design net
   classes keep the spec's 0.2 mm clearance and 0.25 / 0.5 mm tracks.
 
 ## Open items
 
-- **Reverse polarity through J3.** D1 protects only the board's own +24V rail.
-  If the 24 V comes from the printer's PSU and the J1 wires are swapped, PSU + lands
-  on board GND and shorts through J3 pin 1 into the Hackerboard and printer ground.
-  A small PPTC in series with J3 pin 1 would stop that. Not yet decided.
+- **Reverse polarity with a shared ground.** D1 protects only the board's own +24V
+  rail. If the supply shares ground with the printer and the J1 wires are swapped,
+  board GND rises to supply +. F2 then trips and stops the short through the
+  Hackerboard ground, and the 10 kΩ R7–R10 keep the current into the input pins to
+  about 2.4 mA each. Two exposures remain:
+  - The pull-ups R3–R6 draw up to about 11 mA out of +3V3, pulling it about 0.6 V
+    below GND. That is past the U1 and U2 supply-pin limits. A Schottky clamp from GND
+    to +3V3 would fix it.
+  - A programming adapter plugged in at the same time sees 41–57 mA through R11, which
+    burns R11 (0.8–1.5 W) and stresses U2's UPDI pin and the adapter. Check J1
+    polarity before plugging in an adapter.
+  A reverse-polarity MOSFET in the J1 return would remove both by keeping board GND
+  from rising at all.
+- **Strip short.** F1 protects the wiring and D1, not Q1. A short across J2 while the
+  strip is lit can destroy Q1 (3 A continuous, 12 A for 10 µs). A failed Q1 usually
+  shorts and leaves the strip on. Replace Q1 after any strip short.
+- **Hot-plug overshoot.** The all-ceramic 24 V input rings when J1 is hot-plugged, and
+  D1 holds the peak on +24V. At 24 V with leads of 2 m or less the first peak is about
+  30–36 V. At 28 V with heavy leads and F1 near its minimum resistance it can reach
+  45–50 V, above Q1's 45 V and the capacitors' 50 V rating. A 47 µF 50 V electrolytic
+  on +24V would damp it to under 30 V.
 - Prusa lists the Core One INDX as *not compatible* with the GPIO Hackerboard, although
   firmware 6.9.1 and 6.10.1 still enable the M262–M268 commands on it.
-- The all-ceramic 24 V input can overshoot on hot-plug. The F1 resistance damps it to
-  an estimated 30–40 V peak, under Q1's 45 V and every other rating. A TVS on the
-  input would add margin.
 - JLCPCB charges a small-board fee when a side is 30 mm or less. 40 × 31 mm avoids it.

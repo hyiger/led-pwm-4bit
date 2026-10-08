@@ -6,8 +6,10 @@
 # Always runs ERC, the netlist check and DRC (with schematic parity and a
 # zone refill), then writes the schematic PDF, the BOM, a Mouser BOM-tool
 # order CSV for BOARDS boards (default 1), the position file and renders.
-# The order CSV takes Mouser part numbers from the symbols' Mouser field;
-# lines without one are matched by manufacturer part number. Gerbers and
+# Resistors, capacitors and D3 are rounded up for spares and to at least the
+# 10-piece price break. The order CSV takes Mouser part numbers from a symbol
+# field named Mouser when one exists; other lines match on manufacturer part
+# number. Gerbers and
 # drill files are written only when DRC reports no violations and no unrouted
 # connections; --force writes them anyway.
 set -euo pipefail
@@ -69,7 +71,12 @@ with open('fab/led-pwm-4bit-mouser-order.csv', 'w', newline='') as f:
     w.writerow(rows[0])
     for r in rows[1:]:
         if r[2].strip():
-            r[1] = str(int(r[1]) * boards)
+            n = int(r[1]) * boards
+            refs = r[4].replace(' ', '').split(',')
+            # Hand-placed resistors, capacitors and D3: spares, and never below the 10-piece break.
+            if all(x[0] in 'RC' or x == 'D3' for x in refs):
+                n = max(10, n + max(2, -(-n // 10)))
+            r[1] = str(n)
             w.writerow(r)
 os.remove('fab/reports/mouser-raw.csv')
 EOF

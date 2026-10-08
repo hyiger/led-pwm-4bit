@@ -25,6 +25,12 @@
 	(condition "B.Type == 'Pad' && !(A.memberOfFootprint('TP*') && B.memberOfFootprint('TP*'))")
 	(constraint silk_clearance (min 0.15mm)))
 
+# Keep copper out from under M3 screw heads, washers and standoffs (r = 3.75 mm), so
+# metal mounting hardware cannot join board GND to a grounded frame around F2.
+(rule "M3 hardware keepout"
+	(condition "A.memberOfFootprint('H*')")
+	(constraint hole_clearance (min 2.15mm)))
+
 # Spec section 8: 0.5 mm minimum on the 24 V, LED and ground-return nets.
 (rule "Power track width"
 	(condition "A.NetClass == 'Power'")

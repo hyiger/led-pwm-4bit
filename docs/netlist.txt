@@ -4,7 +4,10 @@
 # Format: NET: REF.PIN ...   Every pin of every part except H1 and H2
 # appears exactly once. "NC:" lists pins that must stay unconnected.
 #
-# Differs from spec Rev 0.1 section 6 in three places:
+# Differs from spec Rev 0.1 section 6 in four places:
+# - The Hackerboard and programming-adapter grounds (J3.1, J4.1, J4.2) reach
+#   board GND through F2, a PPTC that opens if J1 is wired backwards while
+#   the supply shares ground with the printer.
 # - The 47 uF electrolytic C2 is replaced by two 1206 MLCCs, C2 and C9.
 # - J4 is a 6-pin FTDI-style header with an on-board SerialUPDI network
 #   (D3, R11) instead of a 3-pin UPDI header.
@@ -15,7 +18,8 @@
 +24V_IN: J1.1 F1.1
 VIN_F:   F1.2 D1.2
 +24V:    D1.1 C1.1 C2.1 C9.1 U1.3 D2.1 J2.1 TP1.1
-GND:     J1.2 C1.2 C2.2 C9.2 U1.1 C3.2 C4.2 U2.8 R2.2 Q1.2 J3.1 J4.1 J4.2 C5.2 C6.2 C7.2 C8.2 TP3.1
+GND:     J1.2 C1.2 C2.2 C9.2 U1.1 C3.2 C4.2 U2.8 R2.2 Q1.2 F2.2 C5.2 C6.2 C7.2 C8.2 TP3.1
+HB_GND:  J3.1 J4.1 J4.2 F2.1
 +3V3:    U1.2 C3.1 C4.1 U2.1 R3.1 R4.1 R5.1 R6.1 TP2.1
 UPDI:     U2.6 R11.2
 UPDI_BUS: J4.5 R11.1 D3.2

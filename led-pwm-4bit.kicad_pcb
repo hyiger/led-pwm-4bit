@@ -94,6 +94,177 @@
 			(outputdirectory "")
 		)
 	)
+	(footprint "Fuse:Fuse_1812_4532Metric"
+		(layer "F.Cu")
+		(uuid "006920ae-dc7b-4654-8414-2c58c8079ec9")
+		(at 127.05 102.15)
+		(descr "Fuse SMD 1812 (4532 Metric), square (rectangular) end terminal, IPC-7351 nominal, (Body size source: https://www.nikhef.nl/pub/departments/mt/projects/detectorR_D/dtddice/ERJ2G.pdf)")
+		(tags "fuse")
+		(property "Reference" "F2"
+			(at 0 0 0)
+			(layer "F.SilkS")
+			(uuid "fb4643bd-58df-4339-9a38-edb21d64a8a0")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "Value" "0.1A 60V"
+			(at 0 2.65 0)
+			(layer "F.Fab")
+			(uuid "4222cdea-7192-495e-9ba5-bcf1e945c0c9")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 0 0 0)
+			(layer "F.Fab")
+			(hide yes)
+			(uuid "dc892799-b61e-4445-af70-92e989051599")
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "PPTC in the Hackerboard and programmer ground return, 0.1 A hold, 60 V, 100 A"
+			(at 0 0 0)
+			(layer "F.Fab")
+			(hide yes)
+			(uuid "75ededc9-4657-4f95-b2a4-ff376dea0e28")
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "KiLib_Generator" "SMD_2terminal_chip_molded"
+			(at 0 0 0)
+			(layer "F.SilkS")
+			(hide yes)
+			(uuid "d07d1aba-85c3-411f-9e32-2341452026ad")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "MPN" "0ZCG0010FF2C"
+			(at 0 0 0)
+			(layer "F.Fab")
+			(hide yes)
+			(uuid "d101fa6b-14d5-4286-9ca8-839ff7171410")
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Manufacturer" "Bel Fuse"
+			(at 0 0 0)
+			(layer "F.Fab")
+			(hide yes)
+			(uuid "ac05320d-0675-48fb-aea1-badc0f330c56")
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(path "/7562f5c5-e945-5ab8-ad9c-cb9e9dbb8a13")
+		(sheetname "/")
+		(sheetfile "led-pwm-4bit.kicad_sch")
+		(attr smd)
+		(duplicate_pad_numbers_are_jumpers no)
+		(fp_line
+			(start -1.386252 -1.71)
+			(end 1.386252 -1.71)
+			(stroke
+				(width 0.15)
+				(type solid)
+			)
+			(layer "F.SilkS")
+			(uuid "230eb1b0-044b-4252-856b-9361ab9761ea")
+		)
+		(fp_line
+			(start -1.386252 1.71)
+			(end 1.386252 1.71)
+			(stroke
+				(width 0.15)
+				(type solid)
+			)
+			(layer "F.SilkS")
+			(uuid "18fbbe11-941d-4ce5-abf9-224ec444de6d")
+		)
+		(fp_rect
+			(start -2.95 -1.95)
+			(end 2.95 1.95)
+			(stroke
+				(width 0.05)
+				(type solid)
+			)
+			(fill no)
+			(layer "F.CrtYd")
+			(uuid "ba95d143-dfa7-4f90-9435-539acd083b5c")
+		)
+		(fp_rect
+			(start -2.25 -1.6)
+			(end 2.25 1.6)
+			(stroke
+				(width 0.1)
+				(type solid)
+			)
+			(fill no)
+			(layer "F.Fab")
+			(uuid "500ca899-879c-490c-b74e-a696bd7f969e")
+		)
+		(fp_text user "${REFERENCE}"
+			(at 0 0 0)
+			(layer "F.Fab")
+			(uuid "dcfaac14-da92-404c-86bc-51a73716feaa")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
+			)
+		)
+		(pad "1" smd roundrect
+			(at -2.1375 0)
+			(size 1.125 3.4)
+			(layers "F.Cu" "F.Mask" "F.Paste")
+			(roundrect_rratio 0.222222)
+			(net "/HB_GND")
+			(uuid "3ba7fd3d-c5a4-4fea-b5c5-03f5cff3a092")
+		)
+		(pad "2" smd roundrect
+			(at 2.1375 0)
+			(size 1.125 3.4)
+			(layers "F.Cu" "F.Mask" "F.Paste")
+			(roundrect_rratio 0.222222)
+			(net "GND")
+			(uuid "4571f05c-1b64-42f2-806f-5f7f03fba6d2")
+		)
+		(embedded_fonts no)
+		(model "${KICAD10_3DMODEL_DIR}/Fuse.3dshapes/Fuse_1812_4532Metric.step"
+			(offset
+				(xyz 0 0 0)
+			)
+			(scale
+				(xyz 1 1 1)
+			)
+			(rotate
+				(xyz 0 0 0)
+			)
+		)
+	)
 	(footprint "Connector_PinHeader_2.54mm:PinHeader_1x06_P2.54mm_Vertical"
 		(locked yes)
 		(layer "F.Cu")
@@ -102,7 +273,7 @@
 		(descr "Through hole straight pin header, 1x06, 2.54mm pitch, single row")
 		(tags "Through hole pin header THT 1x06 2.54mm single row")
 		(property "Reference" "J4"
-			(at 0 -2.464999 0)
+			(at 2 -0.4 0)
 			(layer "F.SilkS")
 			(uuid "c0f426a7-b2cb-47d2-8371-5b90634edc56")
 			(effects
@@ -324,7 +495,7 @@
 			(drill 1)
 			(layers "*.Cu" "*.Mask")
 			(remove_unused_layers no)
-			(net "GND")
+			(net "/HB_GND")
 			(uuid "63a4dd46-f625-4e58-bba5-942ab398a1a9")
 		)
 		(pad "2" thru_hole circle
@@ -333,7 +504,7 @@
 			(drill 1)
 			(layers "*.Cu" "*.Mask")
 			(remove_unused_layers no)
-			(net "GND")
+			(net "/HB_GND")
 			(uuid "fb12f1d7-7fc6-4203-bc41-50567d855fed")
 		)
 		(pad "3" thru_hole circle
@@ -575,7 +746,7 @@
 				)
 			)
 		)
-		(property "Value" "1k"
+		(property "Value" "10k"
 			(at 0 1.43 180)
 			(layer "F.Fab")
 			(uuid "71895165-2a2f-44c2-95ea-d8337c08852a")
@@ -620,7 +791,7 @@
 				)
 			)
 		)
-		(property "MPN" "RC0603FR-071KL"
+		(property "MPN" "RC0603FR-0710KL"
 			(at 0 0 180)
 			(layer "F.Fab")
 			(hide yes)
@@ -1682,7 +1853,7 @@
 			(drill 1)
 			(layers "*.Cu" "*.Mask")
 			(remove_unused_layers no)
-			(net "GND")
+			(net "/HB_GND")
 			(uuid "9cec94af-3acd-4fa8-83fc-7c2bf968aa32")
 		)
 		(pad "2" thru_hole circle
@@ -2134,7 +2305,7 @@
 				)
 			)
 		)
-		(property "Value" "1k"
+		(property "Value" "10k"
 			(at 0 1.43 180)
 			(layer "F.Fab")
 			(uuid "019e6c24-6bf7-4d04-a33e-175eacbde860")
@@ -2179,7 +2350,7 @@
 				)
 			)
 		)
-		(property "MPN" "RC0603FR-071KL"
+		(property "MPN" "RC0603FR-0710KL"
 			(at 0 0 180)
 			(layer "F.Fab")
 			(hide yes)
@@ -5678,7 +5849,7 @@
 		(descr "Resistor SMD 0603 (1608 Metric), square (rectangular) end terminal, IPC-7351 nominal, (Body size source: IPC-SM-782 page 72, https://www.pcb-3d.com/wordpress/wp-content/uploads/ipc-sm-782a_amendment_1_and_2.pdf)")
 		(tags "resistor")
 		(property "Reference" "R7"
-			(at 2 1.275001 0)
+			(at 2.25 0 0)
 			(layer "F.SilkS")
 			(uuid "334ba16b-3b7c-4a77-8b38-b0a3e630ac77")
 			(effects
@@ -5688,7 +5859,7 @@
 				)
 			)
 		)
-		(property "Value" "1k"
+		(property "Value" "10k"
 			(at 0 1.43 180)
 			(layer "F.Fab")
 			(uuid "fc7069f2-3088-4b11-8df0-e071af4da6d4")
@@ -5733,7 +5904,7 @@
 				)
 			)
 		)
-		(property "MPN" "RC0603FR-071KL"
+		(property "MPN" "RC0603FR-0710KL"
 			(at 0 0 180)
 			(layer "F.Fab")
 			(hide yes)
@@ -6144,7 +6315,7 @@
 		(descr "Resistor SMD 0603 (1608 Metric), square (rectangular) end terminal, IPC-7351 nominal, (Body size source: IPC-SM-782 page 72, https://www.pcb-3d.com/wordpress/wp-content/uploads/ipc-sm-782a_amendment_1_and_2.pdf)")
 		(tags "resistor")
 		(property "Reference" "R3"
-			(at 0 1.275001 0)
+			(at -2.05 0 90)
 			(layer "F.SilkS")
 			(uuid "05619a59-cb72-4b42-8203-9ba85b8b73e3")
 			(effects
@@ -7062,7 +7233,7 @@
 				)
 			)
 		)
-		(property "Value" "1k"
+		(property "Value" "10k"
 			(at 0 1.43 180)
 			(layer "F.Fab")
 			(uuid "8114e4a7-df15-4289-ac2a-0e24de9db3cb")
@@ -7107,7 +7278,7 @@
 				)
 			)
 		)
-		(property "MPN" "RC0603FR-071KL"
+		(property "MPN" "RC0603FR-0710KL"
 			(at 0 0 180)
 			(layer "F.Fab")
 			(hide yes)
@@ -7564,6 +7735,7 @@
 			(effects
 				(font
 					(size 1.27 1.27)
+					(thickness 0.15)
 				)
 			)
 		)
@@ -7575,6 +7747,7 @@
 			(effects
 				(font
 					(size 1.27 1.27)
+					(thickness 0.15)
 				)
 			)
 		)
@@ -7805,6 +7978,18 @@
 		(layer "Edge.Cuts")
 		(uuid "5b12dcab-999a-4c22-80c4-267b475fb310")
 	)
+	(gr_text "GND"
+		(at 135 102.4 0)
+		(layer "F.SilkS")
+		(uuid "8804e79b-65ad-40e5-8630-c932347c25bd")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.15)
+			)
+			(justify left)
+		)
+	)
 	(gr_text "24V IN"
 		(at 104.6 117.95 0)
 		(layer "F.SilkS")
@@ -7946,18 +8131,6 @@
 				(size 1 1)
 				(thickness 0.15)
 			)
-		)
-	)
-	(gr_text "GND"
-		(at 131.85 102.399999 0)
-		(layer "F.SilkS")
-		(uuid "8804e79b-65ad-40e5-8630-c932347c25bd")
-		(effects
-			(font
-				(size 1 1)
-				(thickness 0.15)
-			)
-			(justify right)
 		)
 	)
 	(gr_text "DTR"
