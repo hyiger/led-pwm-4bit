@@ -15,7 +15,7 @@ reference netlist is [docs/netlist.txt](docs/netlist.txt).
 |---|---|
 | Schematic | Done. ERC: 0 violations. `check_netlist.py`: matches `docs/netlist.txt` |
 | Placement | Done. Schematic parity clean |
-| Routing | In progress. DRC after a pour refill: 5 unrouted connections (three `HB_GND` links to the new F2, UPDI_BUS R11–D3, SEL3 R10) and one starved thermal on C6 pad 2. No GND stitching vias yet (see [Routing notes](#routing-notes)) |
+| Routing | In progress. DRC: 0 violations; 5 unrouted connections (three `HB_GND` links to F2, UPDI_BUS R11–D3, SEL3 C8–R10). GND pours stitched with 32 vias |
 | Parts | Every line has a manufacturer part carried by Mouser; see [Parts](#parts) |
 | Firmware | Not started (spec section 9) |
 
@@ -76,13 +76,15 @@ capacitance at 24 V than any 10 µF 1206 part Mouser stocks.
 - Rule areas keep tracks off B.Cu under Q1 and U2, so the bottom pour stays whole
   there (spec section 8). Ground vias are still allowed.
 - Return Q1's source (pin 2) straight to the GND pad of C2.
-- Stitch the pours with GND vias (0.6/0.3 mm). The +24V and +3V3 tracks split the
-  top pour, and the bottom pour currently touches GND only at J1.2. Positions checked
-  on a copy with no new DRC errors: (120.05, 118.5) at C9.2 and (128.6, 120.4) at
-  U1.1, which brings C9 back to U1's input; (117.6, 126.2) at Q1.2/C2.2;
-  (117.5, 112.5) at U2.8/C4.2; and optionally next to C5.2, C7.2 and C8.2.
-- C6 pad 2 gets only one thermal spoke because SEL1 and SEL2 crowd it. A 0.5 mm GND
-  track from the pad to a GND via at (125.75, 108.75) clears the DRC error.
+- The pours are stitched with 32 GND vias (0.6/0.3 mm, tented): one beside each
+  GND pad, two between C9 and U1, plus a sparse 8 mm grid. The +24V and +3V3
+  tracks split the top pour into regions joined only by thin necks, and the vias
+  tie every region to the bottom pour. The vias stay clear of the routes still to
+  be drawn and of the mounting-hole keepout, and no via drill lands on
+  silkscreen. A few via rings reach under the edge of a part outline; they are
+  tented, so this is cosmetic.
+- C6 pad 2 had only one thermal spoke because SEL1 and SEL2 crowd it. It now has a
+  0.5 mm GND track to a via at (125.75, 108.75).
 - `HB_GND` joins J3 pin 1, J4 pins 1–2 and F2 pad 1. A 0.25 mm track is enough,
   and it survives the brief fault current before F2 trips. J3.1 to J4.1 runs easily
   on B.Cu. Keep it out of the GND pour: F2 is the only connection between the two
